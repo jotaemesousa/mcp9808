@@ -13,6 +13,7 @@
 uint8_t addr = 0x30;
 struct mpsse_context *mcp = NULL;
 FILE *f;
+int do_log = 0;
 
 uint16_t read16(uint8_t reg) {
 	uint16_t val = 0;
@@ -79,19 +80,21 @@ int main(int argc, char **argv) {
 
 	signal(SIGINT, int_ctrlc);
 
+
 	if(argc == 2)
 	{
 		f = fopen(argv[1], "w");
+		do_log = 1;
 	}
-	else
-	{
-		f = fopen("file.txt", "w");
-	}
-	if (f == NULL)
-	{
 
-	    printf("Error opening file!\n");
-	    exit(1);
+	if(do_log)
+	{
+		if (f == NULL)
+		{
+
+			printf("Error opening file!\n");
+			exit(1);
+		}
 	}
 
 	if((mcp = MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && mcp->open)
@@ -108,7 +111,10 @@ int main(int argc, char **argv) {
 			usleep(1000000);
 			float temp = readTempC();
 			printf("Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec);
-			fprintf(f, "Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec);
+			if(do_log)
+			{
+				fprintf(f, "Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec);
+			}
 		}
 	}
 }
