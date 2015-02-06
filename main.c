@@ -113,10 +113,10 @@ int main(int argc, char **argv) {
 			i_sec++;
 			usleep(1000000);
 			float temp = readTempC();
-			printf("Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec);
+			printf("Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec%60);
 			if(do_log)
 			{
-				fprintf(f, "Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec);
+				fprintf(f, "Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec%60);
 			}
 		}
 	}
