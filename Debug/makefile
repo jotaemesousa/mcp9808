@@ -34,7 +34,7 @@ mcp9808: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) mcp9808
+	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) mcp9808
 	-@echo ' '
 
 .PHONY: all clean dependents

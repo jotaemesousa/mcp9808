@@ -8,6 +8,7 @@
 #include "stdint.h"
 #include "mcp9808.h"
 #include "stdio.h"
+#include <signal.h>
 
 uint8_t addr = 0x30;
 struct mpsse_context *mcp = NULL;
@@ -15,7 +16,8 @@ struct mpsse_context *mcp = NULL;
 
 uint16_t read16(uint8_t reg) {
 	uint16_t val = 0;
-	uint8_t data[4];
+	char *data = NULL;
+	data = malloc(4);
 	uint8_t bytes[3];
 	bytes[0] = 0x30;
 	bytes[1] = reg;
@@ -30,9 +32,10 @@ uint16_t read16(uint8_t reg) {
 		if(GetAck(mcp) == ACK)
 		{
 			SendAcks(mcp);
-			data[0] = Read(mcp, 1);
+			data = Read(mcp, 2);
+
 			SendNacks(mcp);
-			data[1] = Read(mcp, 1);
+			Read(mcp, 1);
 			if(data)
 			{
 
@@ -63,9 +66,16 @@ float readTempC( void )
 	return temp;
 }
 
+int int_ctrlc(int a)
+{
+
+	Close(mcp);
+	exit(0);
+}
 
 int main(int argc, char **argv) {
 
+	signal(SIGINT, int_ctrlc);
 
 	if((mcp = MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && mcp->open)
 	{
@@ -75,7 +85,10 @@ int main(int argc, char **argv) {
 		a = read16(MCP9808_REG_MANUF_ID);printf("06 = %x\n",a);
 		a = read16(MCP9808_REG_MANUF_ID);printf("07 = %x\n",a);
 
-		printf("temp = %f ºC\n",readTempC());
+		while(1)
+		{
+			usleep(1000000);
+			printf("temp = %f ºC\n",readTempC());
+		}
 	}
-	Close(mcp);
 }

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 from mpsse import *
@@ -14,7 +13,7 @@ if __name__ == '__main__':
     else:
         print "Got a NACK!"
     
-    mcp.Write("\x07")
+    mcp.Write("\x05")
 
     if mcp.GetAck() == 0:
         print "Got an ACK!"
