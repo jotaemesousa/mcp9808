@@ -69,7 +69,10 @@ float readTempC( void )
 
 int int_ctrlc(int a)
 {
-	fclose(f);
+	if(do_log)
+	{
+		fclose(f);
+	}
 	Close(mcp);
 	exit(0);
 }
