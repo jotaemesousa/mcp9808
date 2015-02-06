@@ -9,34 +9,43 @@
 #include "mcp9808.h"
 #include "stdio.h"
 
-uint8_t addr = 0x18;
+uint8_t addr = 0x30;
 struct mpsse_context *mcp = NULL;
-char *data = NULL;
+
 
 uint16_t read16(uint8_t reg) {
 	uint16_t val = 0;
-
+	uint8_t data[4];
 	uint8_t bytes[3];
-	bytes[0] = addr+1;
+	bytes[0] = 0x30;
 	bytes[1] = reg;
+	Start(mcp);
 	Write(mcp, (char *)bytes, 2);
-
 	if(GetAck(mcp) == ACK)
 	{
-		data = Read(mcp, 2);
-		if(data)
+		Stop(mcp);
+		Start(mcp);
+		bytes[0] = 0x31;
+		Write(mcp, (char *)bytes, 1);
+		if(GetAck(mcp) == ACK)
 		{
+			SendAcks(mcp);
+			data[0] = Read(mcp, 1);
+			SendNacks(mcp);
+			data[1] = Read(mcp, 1);
+			if(data)
+			{
+
+			}
 
 		}
 		/* Tell libmpsse to send NACKs after reading data */
-		SendNacks(mcp);
 
-		/* Read in one dummy byte, with a NACK */
-		Read(mcp, 1);
+
 	}
+	Stop(mcp);
 
-
-	val = (bytes[0] << 8) | bytes[1];
+	val = (data[0] << 8) | data[1];
 
 	return val;
 }
@@ -60,13 +69,13 @@ int main(int argc, char **argv) {
 
 	if((mcp = MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && mcp->open)
 	{
-		Start(mcp);
+
 		printf("%s initialized at %dHz (I2C)\n", GetDescription(mcp), GetClock(mcp));
 		int a;
-		a = read16(MCP9808_REG_MANUF_ID);
+		a = read16(MCP9808_REG_MANUF_ID);printf("06 = %x\n",a);
+		a = read16(MCP9808_REG_MANUF_ID);printf("07 = %x\n",a);
 
-		readTempC();
+		printf("temp = %f ºC\n",readTempC());
 	}
-	Stop(mcp);
 	Close(mcp);
 }
