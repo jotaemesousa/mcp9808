@@ -48,7 +48,7 @@ uint16_t read16(uint8_t reg) {
 	}
 	Stop(mcp);
 
-	val = (data[0] << 8) | data[1];
+	val = ((uint8_t)data[0] << 8) | (uint8_t)data[1];
 
 	return val;
 }
@@ -58,7 +58,7 @@ float readTempC( void )
 
 
 	uint16_t t = read16(MCP9808_REG_AMBIENT_TEMP);
-
+	//printf("temp = %x ºC\n",t);
 	float temp = t & 0x0FFF;
 	temp /=  16.0;
 	if (t & 0x1000) temp -= 256;
