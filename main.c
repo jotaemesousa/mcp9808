@@ -67,7 +67,7 @@ float readTempC( void )
 	return temp;
 }
 
-int int_ctrlc(int a)
+void int_ctrlc(int a)
 {
 	if(do_log)
 	{
@@ -79,7 +79,7 @@ int int_ctrlc(int a)
 
 int main(int argc, char **argv) {
 
-	int i_sec;
+	int i_sec = 0;
 
 	signal(SIGINT, int_ctrlc);
 
@@ -120,4 +120,5 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+	return 0;
 }
