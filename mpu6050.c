@@ -10,74 +10,17 @@
 #include "stdio.h"
 #include <signal.h>
 
-uint8_t addr = 0xD0;
+uint8_t addr = 0x30;
 struct mpsse_context *mcp = NULL;
 FILE *f;
 int do_log = 0;
-
-void write8(uint8_t reg, uint8_t data)
-{
-    uint16_t val = 0;
-	uint8_t bytes[3];
-	bytes[0] = addr;
-	bytes[1] = reg;
-        bytes[2] = data;
-	Start(mcp);
-	Write(mcp, (char *)bytes, 3);
-	if(GetAck(mcp) == ACK)
-	{
-		Stop(mcp);
-	}
-	Stop(mcp);
-    
-}
-
-uint8_t read8(uint8_t reg)
-{
-    uint8_t val = 0;
-	char *data = NULL;
-	data = malloc(4);
-	uint8_t bytes[3];
-	bytes[0] = addr;
-	bytes[1] = reg;
-	Start(mcp);
-	Write(mcp, (char *)bytes, 2);
-	if(GetAck(mcp) == ACK)
-	{
-		Stop(mcp);
-		Start(mcp);
-		bytes[0] = addr+1;
-		Write(mcp, (char *)bytes, 1);
-		if(GetAck(mcp) == ACK)
-		{
-			SendAcks(mcp);
-			data = Read(mcp, 1);
-
-			SendNacks(mcp);
-			Read(mcp, 1);
-			if(data)
-			{
-
-			}
-
-		}
-		/* Tell libmpsse to send NACKs after reading data */
-
-
-	}
-	Stop(mcp);
-
-        val = data[0];
-	return val;
-    
-}
 
 uint16_t read16(uint8_t reg) {
 	uint16_t val = 0;
 	char *data = NULL;
 	data = malloc(4);
 	uint8_t bytes[3];
-	bytes[0] = addr;
+	bytes[0] = 0x30;
 	bytes[1] = reg;
 	Start(mcp);
 	Write(mcp, (char *)bytes, 2);
@@ -85,7 +28,7 @@ uint16_t read16(uint8_t reg) {
 	{
 		Stop(mcp);
 		Start(mcp);
-		bytes[0] = addr+1;
+		bytes[0] = 0x31;
 		Write(mcp, (char *)bytes, 1);
 		if(GetAck(mcp) == ACK)
 		{
@@ -161,19 +104,21 @@ int main(int argc, char **argv) {
 	{
 
 		printf("%s initialized at %dHz (I2C)\n", GetDescription(mcp), GetClock(mcp));
-		write8(0x6B, 0);
-                
-                printf("power mngt %d\n", read8(0x6B));
-                
+		int a;
+		a = read16(MCP9808_REG_MANUF_ID);printf("06 = %x\n",a);
+		a = read16(MCP9808_REG_MANUF_ID);printf("07 = %x\n",a);
 
 		while(1)
 		{
 			i_sec++;
-			usleep(20000);
-			printf("read ACC x=%06d, y=%06d, z=%06d\n", (int16_t)read16(0x3B),(int16_t)read16(0x3D),(int16_t)read16(0x3F));
+			usleep(1000000);
+			float temp = readTempC();
+			printf("Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec%60);
+			if(do_log)
+			{
+				fprintf(f, "Temp = %f ºC, %d:%d.%d\n",temp, i_sec / 3600, i_sec/60, i_sec%60);
+			}
 		}
 	}
-	
-	Close(mcp);
 	return 0;
 }
